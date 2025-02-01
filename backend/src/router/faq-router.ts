@@ -5,7 +5,6 @@ const router=Router()
 
 
 
-
 router.get("/",getFaq)
 router.post("/",addFaq)
 

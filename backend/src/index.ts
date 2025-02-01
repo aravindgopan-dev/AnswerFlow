@@ -21,7 +21,7 @@ if (!redisURL) {
 
 
 const redisClient = new Redis(redisURL, {
-  tls: {}, // Enable TLS/SSL for secure connections
+  tls: {}, 
 });
 
 redisClient.on("connect", () => {
@@ -32,7 +32,7 @@ redisClient.on("error", (err) => {
   console.error("Redis error:", err);
 });
 
-
+export {redisClient}
 mongoose
   .connect(mongoURI)
   .then(() => console.log("Connected to MongoDB"))

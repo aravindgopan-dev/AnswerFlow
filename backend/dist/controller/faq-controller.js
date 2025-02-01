@@ -15,38 +15,58 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.addFaq = exports.getFaq = void 0;
 const google_translate_api_1 = require("@vitalets/google-translate-api");
 const faq_modal_1 = __importDefault(require("../modals/faq-modal"));
+const index_1 = require("../index");
 const getFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(req.query.ln);
     const lang = req.query.lang;
-    const all = yield faq_modal_1.default.find({});
-    if (lang === "mal" || lang === "hi" || lang === "en") {
-        const filteredFaqs = all.map((faq) => {
-            const translations = faq.translations;
-            if (translations) {
-                if (lang === "mal" && translations.mal) {
-                    return {
-                        question: translations.mal.question,
-                        answer: translations.mal.answer,
-                    };
+    const cacheKey = `faqs_${lang}`;
+    try {
+        const cachedFaqs = yield index_1.redisClient.get(cacheKey);
+        if (cachedFaqs) {
+            res.json(JSON.parse(cachedFaqs));
+            return;
+        }
+        const all = yield faq_modal_1.default.find({});
+        let filteredFaqs = [];
+        if (lang === "mal" || lang === "hi" || lang === "en") {
+            console.log(lang);
+            filteredFaqs = all.map((faq) => {
+                const translations = faq.translations;
+                if (translations) {
+                    if (lang === "mal" && translations.mal) {
+                        return {
+                            question: translations.mal.question,
+                            answer: translations.mal.answer,
+                        };
+                    }
+                    else if (lang === "hi" && translations.hi) {
+                        return {
+                            question: translations.hi.question,
+                            answer: translations.hi.answer,
+                        };
+                    }
+                    else if (lang === "en") {
+                        return {
+                            question: faq.question,
+                            answer: faq.answer,
+                        };
+                    }
                 }
-                else if (lang === "hi" && translations.hi) {
-                    return {
-                        question: translations.hi.question,
-                        answer: translations.hi.answer,
-                    };
-                }
-                else if (lang === "en") {
-                    return {
-                        question: faq.question,
-                        answer: faq.answer,
-                    };
-                }
-            }
-            return null;
-        }).filter(faq => faq !== null);
+                return null;
+            }).filter((faq) => faq !== null);
+        }
+        else {
+            filteredFaqs = all;
+        }
+        yield index_1.redisClient.set(cacheKey, JSON.stringify(filteredFaqs), "EX", 3600);
         res.json(filteredFaqs);
     }
-    else {
-        res.json(all);
+    catch (error) {
+        console.error("Error fetching FAQs:", error);
+        res.status(500).json({
+            error: "Failed to fetch FAQs",
+            details: error instanceof Error ? error.message : "Unknown error",
+        });
     }
 });
 exports.getFaq = getFaq;
@@ -82,6 +102,7 @@ const addFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
             },
         });
         yield newFaq.save();
+        yield index_1.redisClient.del(["faqs_en", "faqs_hi", "faqs_mal"]);
         res.json({
             message: "FAQ added successfully",
             faq: newFaq,
