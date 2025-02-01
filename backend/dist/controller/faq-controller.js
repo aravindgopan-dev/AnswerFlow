@@ -1,7 +1,98 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTask = void 0;
-const getTask = (req, res) => {
-    res.send('hii');
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-exports.getTask = getTask;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.addFaq = exports.getFaq = void 0;
+const google_translate_api_1 = require("@vitalets/google-translate-api");
+const faq_modal_1 = __importDefault(require("../modals/faq-modal"));
+const getFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const lang = req.query.lang;
+    const all = yield faq_modal_1.default.find({});
+    if (lang === "mal" || lang === "hi" || lang === "en") {
+        const filteredFaqs = all.map((faq) => {
+            const translations = faq.translations;
+            if (translations) {
+                if (lang === "mal" && translations.mal) {
+                    return {
+                        question: translations.mal.question,
+                        answer: translations.mal.answer,
+                    };
+                }
+                else if (lang === "hi" && translations.hi) {
+                    return {
+                        question: translations.hi.question,
+                        answer: translations.hi.answer,
+                    };
+                }
+                else if (lang === "en") {
+                    return {
+                        question: faq.question,
+                        answer: faq.answer,
+                    };
+                }
+            }
+            return null;
+        }).filter(faq => faq !== null);
+        res.json(filteredFaqs);
+    }
+    else {
+        res.json(all);
+    }
+});
+exports.getFaq = getFaq;
+const addFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { question, answer } = req.body;
+        const translateText = (text, targetLanguage, fallbackText) => __awaiter(void 0, void 0, void 0, function* () {
+            try {
+                const translated = yield (0, google_translate_api_1.translate)(text, { to: targetLanguage });
+                return translated.text;
+            }
+            catch (error) {
+                console.error(`Translation error for ${targetLanguage}:`, error);
+                return fallbackText;
+            }
+        });
+        const translatedQuestionML = yield translateText(question, "ml", question);
+        const translatedAnswerML = yield translateText(answer, "ml", answer);
+        const translatedQuestionHI = yield translateText(question, "hi", question);
+        const translatedAnswerHI = yield translateText(answer, "hi", answer);
+        const newFaq = new faq_modal_1.default({
+            question,
+            answer,
+            translations: {
+                mal: {
+                    question: translatedQuestionML,
+                    answer: translatedAnswerML,
+                },
+                hi: {
+                    question: translatedQuestionHI,
+                    answer: translatedAnswerHI,
+                },
+            },
+        });
+        yield newFaq.save();
+        res.json({
+            message: "FAQ added successfully",
+            faq: newFaq,
+        });
+    }
+    catch (error) {
+        console.error("Error adding FAQ:", error);
+        res.status(500).json({
+            error: "Failed to add FAQ",
+            details: error instanceof Error ? error.message : "Unknown error",
+        });
+    }
+});
+exports.addFaq = addFaq;

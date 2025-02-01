@@ -1,9 +1,12 @@
 import { Router ,Request,Response} from "express";
-import { getTask } from "../controller/faq-controller"
+import { getFaq ,addFaq} from "../controller/faq-controller"
 const router=Router()
 
 
 
-router.get("/",getTask)
+
+
+router.get("/",getFaq)
+router.post("/",addFaq)
 
 export default router
