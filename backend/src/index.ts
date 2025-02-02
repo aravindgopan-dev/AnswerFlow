@@ -47,7 +47,7 @@ mongoose
 // Initialize Express app
 const port = process.env.PORT || 5000;
 const app = express();
-const allowedOrigins = ["http://localhost:3000", "https://yourdomain.com"];
+const allowedOrigins = ["http://localhost:3000", "https://answer-flow-pi.vercel.app"];
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
