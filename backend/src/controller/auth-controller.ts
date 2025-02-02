@@ -16,7 +16,7 @@ const generateToken = (username: string): string => {
   });
 };
 
-// ✅ Fix: Explicitly define return type as `void`
+
 export const login = (req: Request, res: Response): void => {
   const { username, password } = req.body;
 

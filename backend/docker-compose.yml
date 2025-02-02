@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  backend:
+    image: backend-app
+    build:
+      context: .
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    container_name: backend-app-container

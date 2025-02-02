@@ -17,11 +17,10 @@ const google_translate_api_1 = require("@vitalets/google-translate-api");
 const faq_modal_1 = __importDefault(require("../modals/faq-modal"));
 const index_1 = require("../index");
 const getFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const lang = req.query.lang || "all"; // Default to "all"
+    const lang = req.query.lang || "all";
     const cacheKey = `faqs_${lang}`;
     try {
         console.log(req.cookies);
-        // If lang is "all", always fetch from DB (avoid caching issue)
         if (lang !== "all") {
             const cachedFaqs = yield index_1.redisClient.get(cacheKey);
             if (cachedFaqs) {
@@ -60,7 +59,6 @@ const getFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
         else {
             filteredFaqs = all;
         }
-        // Cache only if lang is not "all"
         if (lang !== "all") {
             yield index_1.redisClient.set(cacheKey, JSON.stringify(filteredFaqs), "EX", 3600);
         }
@@ -107,7 +105,6 @@ const addFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
             },
         });
         yield newFaq.save();
-        // Clear all cached FAQ data
         yield index_1.redisClient.del(["faqs_en", "faqs_hi", "faqs_mal", "faqs_all"]);
         res.json({
             message: "FAQ added successfully",

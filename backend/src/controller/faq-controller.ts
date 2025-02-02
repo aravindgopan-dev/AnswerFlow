@@ -19,12 +19,12 @@ interface FAQ {
 }
 
 const getFaq = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const lang = (req.query.lang as string) || "all"; // Default to "all"
+    const lang = (req.query.lang as string) || "all"; 
     const cacheKey = `faqs_${lang}`;
 
     try {
         console.log(req.cookies)
-        // If lang is "all", always fetch from DB (avoid caching issue)
+        
         if (lang !== "all") {
             const cachedFaqs = await redisClient.get(cacheKey);
             if (cachedFaqs) {
@@ -63,7 +63,7 @@ const getFaq = async (req: Request, res: Response, next: NextFunction): Promise<
             filteredFaqs = all;
         }
 
-        // Cache only if lang is not "all"
+     
         if (lang !== "all") {
             await redisClient.set(cacheKey, JSON.stringify(filteredFaqs), "EX", 3600);
         }
@@ -114,7 +114,7 @@ const addFaq = async (req: Request, res: Response, next: NextFunction): Promise<
 
         await newFaq.save();
 
-        // Clear all cached FAQ data
+    
         await redisClient.del(["faqs_en", "faqs_hi", "faqs_mal", "faqs_all"]);
 
         res.json({

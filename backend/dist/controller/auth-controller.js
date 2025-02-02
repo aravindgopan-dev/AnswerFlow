@@ -17,7 +17,6 @@ const generateToken = (username) => {
         expiresIn: "1h",
     });
 };
-// ✅ Fix: Explicitly define return type as `void`
 const login = (req, res) => {
     const { username, password } = req.body;
     if (username !== ADMIN_CREDENTIALS.username || password !== ADMIN_CREDENTIALS.password) {
