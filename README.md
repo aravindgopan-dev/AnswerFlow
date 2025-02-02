@@ -1,5 +1,12 @@
 # 📌 **FAQ Management System** – *BHARATHFD*
 
+## imagese
+![alt text](faq.png)
+![alt text](editor.png)
+
+
+
+
 ## 🚀 **Live Deployment**  
 🔹 **Frontend:** [Visit Here](https://answer-flow-pi.vercel.app/)  
 🔹 **Backend:** [Visit Here](https://answerflow-0j2v.onrender.com/)  
@@ -67,4 +74,4 @@
    npm install
    npm run dev
 
-   
+   make this markdown good reduce size of images
