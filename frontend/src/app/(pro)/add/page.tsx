@@ -1,24 +1,25 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import "easymde/dist/easymde.min.css";
 import axios from "axios";
 import { marked } from "marked";
 import { getCookie } from "cookies-next";
 
-
+axios.defaults.withCredentials = true;
 // Load SimpleMDE dynamically with SSR disabled
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 
 type Props = {};
 
 const Page = (props: Props) => {
-
+    const router = useRouter();
     const [question, setQuestion] = useState("");  
     const [markdown, setMarkdown] = useState("**Simple text**");
-    const token=getCookie("token")
-    console.log(token)
+    const token = getCookie("token");
+    console.log(token);
     
     // Function to handle form submission
     const handleSubmit = async () => {
@@ -28,13 +29,14 @@ const Page = (props: Props) => {
         };
 
         try {
-            const response = await axios.post("https://answerflow-gcze.onrender.com/api/v1/faq", data, {
+            const response = await axios.post("/api/v1/faq", data, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
 
             console.log("FAQ added successfully:", response.data);
+            router.push("/faq");
         } catch (error) {
             console.error("Error adding FAQ:", error);
         }

@@ -1,20 +1,24 @@
 "use client"
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
-import { cookies } from "next/headers"; // for accessing cookies on the client side
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post("http://localhost:4000/api/v1/auth/login", { username, password });
+      const response = await axios.post("/api/v1/auth/login", { username, password });
       
       // Store the token in a cookie
       document.cookie = `token=${response.data.token}; path=/; max-age=3600`;
 
       console.log("Login successful:", response.data);
+
+      // Redirect to /faq
+      router.push("/faq");
     } catch (error) {
       console.error("Login failed:", error);
     }

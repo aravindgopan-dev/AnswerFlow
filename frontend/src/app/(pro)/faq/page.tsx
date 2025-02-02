@@ -1,6 +1,8 @@
 "use client"
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+
 axios.defaults.withCredentials = true;
 interface FAQ {
   question: string;
@@ -21,7 +23,7 @@ const Page = () => {
   const [data, setData] = useState<FAQ[] | null>(null);
 
   useEffect(() => {
-    axios.get("http://localhost:4000/api/v1/faq")
+    axios.get("/api/v1/faq")
       .then((res) => setData(res.data))
       .catch((err) => console.error("Error fetching FAQ data:", err));
   }, []);
@@ -32,8 +34,9 @@ const Page = () => {
 
   return (
     <div>
-      <div className='text-center p-4'>
-        FAQ
+      <div className='text-center p-4 flex justify-between items-center'>
+        <h1 className='text-2xl font-bold'>FAQ</h1>
+        <Link href="/add" className="btn btn-primary">Add FAQ</Link>
       </div>
       <div className="overflow-x-auto p-4">
         <table className="table table-xs table-auto w-full">
@@ -61,7 +64,6 @@ const Page = () => {
               </tr>
             ))}
           </tbody>
-          
         </table>
       </div>
     </div>
