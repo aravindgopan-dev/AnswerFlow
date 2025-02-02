@@ -6,6 +6,10 @@ import faq from "./router/faq-router";
 import auth from "./router/auth-router"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import { tokenMiddleware } from "./middleware/auth";
+
+
+
 dotenv.config();
 
 
@@ -43,15 +47,25 @@ mongoose
 // Initialize Express app
 const port = process.env.PORT || 5000;
 const app = express();
+const allowedOrigins = ["http://localhost:3000", "https://yourdomain.com"];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 
-app.use(cors({ origin: "*" }));
 // Middleware
 app.use(express.json()); // Parse JSON request bodies
 
 app.use(cookieParser());
-
+app.use(express.urlencoded({ extended: true }));
 // Routes
-app.use("/api/v1/faq", faq);
+app.use("/api/v1/faq",tokenMiddleware, faq);
 app.use("/api/v1/auth",auth)
 
 // Start the server

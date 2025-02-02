@@ -12,6 +12,7 @@ const faq_router_1 = __importDefault(require("./router/faq-router"));
 const auth_router_1 = __importDefault(require("./router/auth-router"));
 const cors_1 = __importDefault(require("cors"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const auth_1 = require("./middleware/auth");
 dotenv_1.default.config();
 const mongoURI = process.env.MONGO;
 const redisURL = process.env.REDIS;
@@ -38,12 +39,24 @@ mongoose_1.default
 // Initialize Express app
 const port = process.env.PORT || 5000;
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)({ origin: "*" }));
+const allowedOrigins = ["http://localhost:3000", "https://yourdomain.com"];
+app.use((0, cors_1.default)({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, origin);
+        }
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
 // Middleware
 app.use(express_1.default.json()); // Parse JSON request bodies
 app.use((0, cookie_parser_1.default)());
+app.use(express_1.default.urlencoded({ extended: true }));
 // Routes
-app.use("/api/v1/faq", faq_router_1.default);
+app.use("/api/v1/faq", auth_1.tokenMiddleware, faq_router_1.default);
 app.use("/api/v1/auth", auth_router_1.default);
 // Start the server
 app.listen(port, () => {

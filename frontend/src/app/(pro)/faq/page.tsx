@@ -1,7 +1,7 @@
 "use client"
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-
+axios.defaults.withCredentials = true;
 interface FAQ {
   question: string;
   answer: string;
@@ -21,7 +21,7 @@ const Page = () => {
   const [data, setData] = useState<FAQ[] | null>(null);
 
   useEffect(() => {
-    axios.get("https://answerflow-gcze.onrender.com/api/v1/faq")
+    axios.get("http://localhost:4000/api/v1/faq")
       .then((res) => setData(res.data))
       .catch((err) => console.error("Error fetching FAQ data:", err));
   }, []);

@@ -1,5 +1,5 @@
 "use client";
-import { cookies } from "next/headers";
+
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import "easymde/dist/easymde.min.css";
@@ -7,16 +7,19 @@ import axios from "axios";
 import { marked } from "marked";
 import { getCookie } from "cookies-next";
 
+
 // Load SimpleMDE dynamically with SSR disabled
 const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 
 type Props = {};
 
 const Page = (props: Props) => {
+
     const [question, setQuestion] = useState("");  
     const [markdown, setMarkdown] = useState("**Simple text**");
     const token=getCookie("token")
     console.log(token)
+    
     // Function to handle form submission
     const handleSubmit = async () => {
         const data = {
