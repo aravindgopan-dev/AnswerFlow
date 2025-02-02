@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import Redis from "ioredis";
 import faq from "./router/faq-router";
-
+import cors from "cors"
 
 dotenv.config();
+
 
 
 const mongoURI = process.env.MONGO;
@@ -42,6 +43,7 @@ mongoose
 const port = process.env.PORT || 5000;
 const app = express();
 
+app.use(cors({ origin: "*" }));
 // Middleware
 app.use(express.json()); // Parse JSON request bodies
 
