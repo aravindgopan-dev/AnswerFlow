@@ -3,8 +3,9 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import Redis from "ioredis";
 import faq from "./router/faq-router";
+import auth from "./router/auth-router"
 import cors from "cors"
-
+import cookieParser from "cookie-parser"
 dotenv.config();
 
 
@@ -47,8 +48,11 @@ app.use(cors({ origin: "*" }));
 // Middleware
 app.use(express.json()); // Parse JSON request bodies
 
+app.use(cookieParser());
+
 // Routes
 app.use("/api/v1/faq", faq);
+app.use("/api/v1/auth",auth)
 
 // Start the server
 app.listen(port, () => {

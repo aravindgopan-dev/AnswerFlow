@@ -9,7 +9,9 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const ioredis_1 = __importDefault(require("ioredis"));
 const faq_router_1 = __importDefault(require("./router/faq-router"));
+const auth_router_1 = __importDefault(require("./router/auth-router"));
 const cors_1 = __importDefault(require("cors"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 dotenv_1.default.config();
 const mongoURI = process.env.MONGO;
 const redisURL = process.env.REDIS;
@@ -39,8 +41,10 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)({ origin: "*" }));
 // Middleware
 app.use(express_1.default.json()); // Parse JSON request bodies
+app.use((0, cookie_parser_1.default)());
 // Routes
 app.use("/api/v1/faq", faq_router_1.default);
+app.use("/api/v1/auth", auth_router_1.default);
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

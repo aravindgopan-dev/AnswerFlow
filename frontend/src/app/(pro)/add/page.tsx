@@ -1,21 +1,27 @@
 "use client";
+import { cookies } from "next/headers";
 import React, { useState } from "react";
-import SimpleMDE from "react-simplemde-editor";
+import dynamic from "next/dynamic";
 import "easymde/dist/easymde.min.css";
 import axios from "axios";
-import { marked } from "marked";  // Ensure marked is imported
+import { marked } from "marked";
+import { getCookie } from "cookies-next";
+
+// Load SimpleMDE dynamically with SSR disabled
+const SimpleMDE = dynamic(() => import("react-simplemde-editor"), { ssr: false });
 
 type Props = {};
 
 const Page = (props: Props) => {
-    const [question, setQuestion] = useState("");  // State for the question
-    const [markdown, setMarkdown] = useState("**Simple text**");  // State for the answer (Markdown)
-
+    const [question, setQuestion] = useState("");  
+    const [markdown, setMarkdown] = useState("**Simple text**");
+    const token=getCookie("token")
+    console.log(token)
     // Function to handle form submission
     const handleSubmit = async () => {
         const data = {
-            question: question,
-            answer: markdown  // Send markdown as raw text
+            question,
+            answer: markdown,  
         };
 
         try {
@@ -33,9 +39,7 @@ const Page = (props: Props) => {
 
     return (
         <div className="p-6 bg-base-200 min-h-screen">
-            <div className="text-2xl font-bold mb-6 text-center">
-                Add FAQ
-            </div>
+            <div className="text-2xl font-bold mb-6 text-center">Add FAQ</div>
             <div className="flex justify-center mb-6">
                 <textarea
                     className="textarea textarea-bordered w-full md:w-3/4 lg:w-1/2 bg-base-100 shadow-lg"
@@ -51,19 +55,18 @@ const Page = (props: Props) => {
 
                     {/* Preview Section */}
                     <div className="mt-4 p-4 border bg-base-100 rounded-lg shadow-lg">
-                        <h3 className="text-lg font-semibold mb-2">{question || "Your question will appear here..."}</h3>
+                        <h3 className="text-lg font-semibold mb-2">
+                            {question || "Your question will appear here..."}
+                        </h3>
                         <div
                             className="markdown-preview"
-                            dangerouslySetInnerHTML={{ __html: marked(markdown) }}  // Convert markdown to HTML in the preview
+                            dangerouslySetInnerHTML={{ __html: marked(markdown) }}  
                         />
                     </div>
 
                     {/* Submit Button */}
                     <div className="flex justify-center mt-4">
-                        <button
-                            className="btn btn-primary"
-                            onClick={handleSubmit}
-                        >
+                        <button className="btn btn-primary" onClick={handleSubmit}>
                             Submit FAQ
                         </button>
                     </div>

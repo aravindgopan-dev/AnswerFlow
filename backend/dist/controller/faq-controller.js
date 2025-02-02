@@ -17,19 +17,21 @@ const google_translate_api_1 = require("@vitalets/google-translate-api");
 const faq_modal_1 = __importDefault(require("../modals/faq-modal"));
 const index_1 = require("../index");
 const getFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.query.ln);
-    const lang = req.query.lang;
+    const lang = req.query.lang || "all"; // Default to "all"
     const cacheKey = `faqs_${lang}`;
     try {
-        const cachedFaqs = yield index_1.redisClient.get(cacheKey);
-        if (cachedFaqs) {
-            res.json(JSON.parse(cachedFaqs));
-            return;
+        console.log(req.cookies);
+        // If lang is "all", always fetch from DB (avoid caching issue)
+        if (lang !== "all") {
+            const cachedFaqs = yield index_1.redisClient.get(cacheKey);
+            if (cachedFaqs) {
+                res.json(JSON.parse(cachedFaqs));
+                return;
+            }
         }
         const all = yield faq_modal_1.default.find({});
-        let filteredFaqs = [];
+        let filteredFaqs;
         if (lang === "mal" || lang === "hi" || lang === "en") {
-            console.log(lang);
             filteredFaqs = all.map((faq) => {
                 const translations = faq.translations;
                 if (translations) {
@@ -58,7 +60,10 @@ const getFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
         else {
             filteredFaqs = all;
         }
-        yield index_1.redisClient.set(cacheKey, JSON.stringify(filteredFaqs), "EX", 3600);
+        // Cache only if lang is not "all"
+        if (lang !== "all") {
+            yield index_1.redisClient.set(cacheKey, JSON.stringify(filteredFaqs), "EX", 3600);
+        }
         res.json(filteredFaqs);
     }
     catch (error) {
@@ -102,7 +107,8 @@ const addFaq = (req, res, next) => __awaiter(void 0, void 0, void 0, function* (
             },
         });
         yield newFaq.save();
-        yield index_1.redisClient.del(["faqs_en", "faqs_hi", "faqs_mal"]);
+        // Clear all cached FAQ data
+        yield index_1.redisClient.del(["faqs_en", "faqs_hi", "faqs_mal", "faqs_all"]);
         res.json({
             message: "FAQ added successfully",
             faq: newFaq,

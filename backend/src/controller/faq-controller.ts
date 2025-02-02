@@ -23,6 +23,7 @@ const getFaq = async (req: Request, res: Response, next: NextFunction): Promise<
     const cacheKey = `faqs_${lang}`;
 
     try {
+        console.log(req.cookies)
         // If lang is "all", always fetch from DB (avoid caching issue)
         if (lang !== "all") {
             const cachedFaqs = await redisClient.get(cacheKey);
