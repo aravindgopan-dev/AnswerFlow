@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
+import dotenv from "dotenv";
 
+dotenv.config();
 const tokenMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies.token; 
 
