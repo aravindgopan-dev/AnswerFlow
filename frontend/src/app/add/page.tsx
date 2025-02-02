@@ -19,7 +19,7 @@ const Page = (props: Props) => {
         };
 
         try {
-            const response = await axios.post("http://localhost:4000/api/v1/faq", data, {
+            const response = await axios.post("https://answerflow-gcze.onrender.com/api/v1/faq", data, {
                 headers: {
                     "Content-Type": "application/json",
                 },

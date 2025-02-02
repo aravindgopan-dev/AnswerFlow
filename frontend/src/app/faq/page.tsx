@@ -21,7 +21,7 @@ const Page = () => {
   const [data, setData] = useState<FAQ[] | null>(null);
 
   useEffect(() => {
-    axios.get("http://localhost:4000/api/v1/faq")
+    axios.get("https://answerflow-gcze.onrender.com/api/v1/faq")
       .then((res) => setData(res.data))
       .catch((err) => console.error("Error fetching FAQ data:", err));
   }, []);

@@ -19,25 +19,25 @@ interface FAQ {
 }
 
 const getFaq = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    console.log(req.query.ln)
-    const lang = req.query.lang as string;
+    const lang = (req.query.lang as string) || "all"; // Default to "all"
     const cacheKey = `faqs_${lang}`;
 
     try {
-        const cachedFaqs = await redisClient.get(cacheKey);
-        if (cachedFaqs) {
-            res.json(JSON.parse(cachedFaqs));
-            return;
+        // If lang is "all", always fetch from DB (avoid caching issue)
+        if (lang !== "all") {
+            const cachedFaqs = await redisClient.get(cacheKey);
+            if (cachedFaqs) {
+                res.json(JSON.parse(cachedFaqs));
+                return;
+            }
         }
 
         const all = await faqModel.find({});
+        let filteredFaqs: FAQ[];
 
-        let filteredFaqs: FAQ[] = [];
         if (lang === "mal" || lang === "hi" || lang === "en") {
-            console.log(lang)
             filteredFaqs = all.map((faq) => {
                 const translations = faq.translations;
-
                 if (translations) {
                     if (lang === "mal" && translations.mal) {
                         return {
@@ -62,7 +62,10 @@ const getFaq = async (req: Request, res: Response, next: NextFunction): Promise<
             filteredFaqs = all;
         }
 
-        await redisClient.set(cacheKey, JSON.stringify(filteredFaqs), "EX", 3600);
+        // Cache only if lang is not "all"
+        if (lang !== "all") {
+            await redisClient.set(cacheKey, JSON.stringify(filteredFaqs), "EX", 3600);
+        }
 
         res.json(filteredFaqs);
     } catch (error) {
@@ -110,7 +113,8 @@ const addFaq = async (req: Request, res: Response, next: NextFunction): Promise<
 
         await newFaq.save();
 
-        await redisClient.del(["faqs_en", "faqs_hi", "faqs_mal"]);
+        // Clear all cached FAQ data
+        await redisClient.del(["faqs_en", "faqs_hi", "faqs_mal", "faqs_all"]);
 
         res.json({
             message: "FAQ added successfully",
